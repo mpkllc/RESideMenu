@@ -168,7 +168,46 @@
             [self hideViewController:self.contentViewController];
             [contentViewController didMoveToParentViewController:self];
             _contentViewController = contentViewController;
+            
+            [self statusBarNeedsAppearanceUpdate];
+            [self updateContentViewShadow];
+            
+            if (self.visible) {
+                [self addContentViewControllerMotionEffects];
+            }
+        }];
+    }
+}
 
+- (void)moveToContentViewController:(UIViewController *)contentViewController animated:(BOOL)animated
+{
+    if (_contentViewController == contentViewController)
+    {
+        return;
+    }
+    
+    if (!animated) {
+        [self setContentViewController:contentViewController];
+    } else {
+        [self addChildViewController:contentViewController];
+        contentViewController.view.frame = ({
+            CGRect frame = self.contentViewContainer.bounds;
+            frame.origin.x = frame.size.width;
+            frame;
+        });
+        [self.contentViewContainer addSubview:contentViewController.view];
+        [UIView animateWithDuration:self.animationDuration animations:^{
+            contentViewController.view.frame = self.contentViewContainer.bounds;
+            self.contentViewController.view.frame = ({
+                CGRect frame = self.contentViewContainer.bounds;
+                frame.origin.x -= frame.size.width * .5;
+                frame;
+            });
+        } completion:^(BOOL finished) {
+            [self hideViewController:self.contentViewController];
+            [contentViewController didMoveToParentViewController:self];
+            _contentViewController = contentViewController;
+            
             [self statusBarNeedsAppearanceUpdate];
             [self updateContentViewShadow];
             
